@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us - PhishGuard Pro{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="fas fa-phone" style="color:white"></i> Contact Us</h2>
+            <p>Have questions or need support? We're here to help!</p>
+        </div>
+        <div class="card-body">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start;">
+                <!-- Contact Form -->
+                <div>
+                    <form method="post" action="{{ url_for('contact') }}">
+                        <div class="form-group">
+                            <label for="name">Full Name *</label>
+                            <input type="text" id="name" name="name" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input type="email" id="email" name="email" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="subject">Subject *</label>
+                            <select id="subject" name="subject" class="form-control" required>
+                                <option value="">Select a topic...</option>
+                                <option value="Technical Support">Technical Support</option>
+                                <option value="Feature Request">Feature Request</option>
+                                <option value="Bug Report">Bug Report</option>
+                                <option value="General Inquiry">General Inquiry</option>
+                                <option value="Partnership">Partnership Opportunity</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="message">Message *</label>
+                            <textarea id="message" name="message" class="form-control" rows="6" 
+                                      placeholder="Please describe your inquiry in detail..." required></textarea>
+                            <div class="form-help">Minimum 10 characters required</div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            📧 Send Message
+                        </button>
+                    </form>
+                </div>
+                
+               
+<!-- Contact Information -->
+<div class="contact-section">
+    <div class="card contact-card">
+        <div class="card-body">
+            <h2 class="contact-title"><i class="fas fa-phone" style="color: #007bff; margin-right: 0.8rem; margin-bottom: 2.0rem;"></i> Get in Touch</h2>
+
+            <div class="contact-item" style="margin-bottom: 2.5rem;">
+                <h3><i class="fas fa-envelope" style="color: #007bff; margin-right: 0.5rem;"></i> Email Support</h4>
+                <p class="contact-desc"><small>We typically respond within 24 hours</small></p>
+            </div>
+
+            <div class="contact-item" style="margin-bottom: 2.5rem;">
+                <h3><i class="fas fa-clock" style="color: #007bff; margin-right: 0.5rem;"></i> Support Hours</h4>
+                <p class="contact-desc">
+                    Monday - Friday: 9:00 AM - 6:00 PM<br>
+                    Saturday: 10:00 AM - 4:00 PM<br>
+                    Sunday: Closed
+                </p>
+            </div>
+
+            <div class="contact-item" style="margin-bottom: 2.5rem;">
+               <h3><i class="fas fa-users" style="color: #007bff; margin-right: 0.5rem;"></i>Development Team</h4>
+
+                <p class="contact-desc">
+                    <strong>PRANAV VP</strong><br>
+                    <strong>PRAJWAL CA</strong><br>
+                    <strong>NAGASHREE DS</strong><br>
+                    <strong>PALLAVI JHA</strong>
+                </p>
+            </div>
+
+            <div class="contact-item" style="margin-bottom: 2.5rem;">
+                <h3><i class="fas fa-shield-alt" style="color: #007bff; margin-right: 0.5rem;"></i> Security</h4>
+                <p class="contact-desc">
+                    For security-related issues, please email:<br>
+                    <strong>pranavvp1507@gmail.com</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+            </div>
+        </div>
+    </div>
+    
+    <!-- FAQ Section -->
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="fas fa-question-circle" style="color: #007bff; margin-right: 0.5rem;"></i>Frequently Asked Questions</h2>
+        </div>
+        <div class="card-body">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div>
+                    <h4 style="color: var(--primary-color); margin-bottom: 0.5rem;">How accurate is the detection?</h4>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                        Our AI models achieve over 95% accuracy using advanced machine learning techniques including TF-IDF vectorization and ensemble methods.
+                    </p>
+                    
+                    <h4 style="color: var(--primary-color); margin-bottom: 0.5rem;">What types of content can I analyze?</h4>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                        You can analyze emails, URLs, and any suspicious text content. Our hybrid mode combines multiple detection methods for comprehensive analysis.
+                    </p>
+                    
+                    <h4 style="color: var(--primary-color); margin-bottom: 0.5rem;">Is my data secure?</h4>
+                    <p style="color: var(--text-secondary); margin-bottom: 0;">
+                        Yes, all data is encrypted and stored securely. We follow industry best practices for data protection and privacy.
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 style="color: var(--primary-color); margin-bottom: 0.5rem;">Can I export detection reports?</h4>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                        Yes, you can export detailed PDF reports of your detections from the analytics dashboard for documentation and compliance purposes.
+                    </p>
+                    
+                    <h4 style="color: var(--primary-color); margin-bottom: 0.5rem;">How do I provide feedback?</h4>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                        After each detection, you can provide feedback on the accuracy. This helps us improve our models and provides valuable data for our development team.
+                    </p>
+                    
+                    <h4 style="color: var(--primary-color); margin-bottom: 0.5rem;">Is there an API available?</h4>
+                    <p style="color: var(--text-secondary); margin-bottom: 0;">
+                        We're working on API access for enterprise customers. Contact us for early access and integration opportunities.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const messageField = document.getElementById('message');
+    
+    form.addEventListener('submit', function(e) {
+        if (messageField.value.trim().length < 10) {
+            e.preventDefault();
+            alert('Please provide a more detailed message (minimum 10 characters).');
+            messageField.focus();
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,517 @@
+{% extends "base.html" %}
+
+{% block title %}Detection Result - PhishGuard Pro{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Result Header -->
+    <div class="card">
+        <div class="card-header">
+            <div class="result-header">
+                <div>
+                    <h2>🔍 Detection Result - {{ mode }}</h2>
+                    <p>Analysis completed with detailed confidence metrics and AI-driven explanations</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('export_report', detection_id=detection_id) }}" 
+                       class="btn btn-outline">
+                        <span class="btn-icon">📄</span>
+                        Export Report
+                    </a>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+                        <span class="btn-icon">🔙</span>
+                        New Analysis
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Display -->
+    <div class="card">
+        <div class="card-header">
+            <h3>📝 Analyzed Content</h3>
+        </div>
+        <div class="card-body">
+            <div class="input-display">{{ input_text }}</div>
+        </div>
+    </div>
+
+    <!-- Enhanced AI Explanations with better visual design -->
+    {% if result.explanations %}
+    <div class="card">
+        <div class="card-header">
+            <div class="ai-header">
+                <div class="ai-icon">🤖</div>
+                <div>
+                    <h3>AI Analysis & Explanations</h3>
+                    <p>Detailed insights from our advanced AI detection system</p>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="ai-explanations-enhanced">
+                {% for explanation in result.explanations %}
+                <div class="explanation-card">
+                    <div class="explanation-content">{{ explanation | safe }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Detection Results -->
+    <div class="card">
+        <div class="card-header">
+            <h3>🎯 Detection Results</h3>
+        </div>
+        <div class="card-body">
+            {% if mode == "Email" %}
+                <div class="result-section">
+                    <div class="result-display">
+                        <div class="result-main">
+                            <span class="result-badge {{ 'phishing' if result.binary_pred == 1 else 'safe' }}">
+                                {{ result.label }}
+                            </span>
+                            <div class="confidence-display">
+                                <div class="confidence-bar-large">
+                                    <div class="confidence-fill-large" style="
+                                        background: {{ 'var(--danger-color)' if result.binary_pred == 1 else 'var(--success-color)' }}; width: {{ (result.probability * 100) }}%;
+                                    "></div>
+                                </div>
+                                <span class="confidence-percentage">
+                                    {{ (result.probability * 100) | round(2) }}%
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if result.meta %}
+                        <div class="meta-info">
+                            <div class="meta-item">
+                                <div class="label">Content Length</div>
+                                <div class="value">{{ result.meta.length | round(0) }} chars</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="label">Digit Ratio</div>
+                                <div class="value">{{ (result.meta.digit_ratio * 100) | round(2) }}%</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="label">Uppercase Ratio</div>
+                                <div class="value">{{ (result.meta.upper_ratio * 100) | round(2) }}%</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="label">Exclamation Marks</div>
+                                <div class="value">{{ result.meta.num_exclam }}</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="label">URLs Found</div>
+                                <div class="value">{{ result.meta.num_urls }}</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="label">Urgent Terms</div>
+                                <div class="value">{{ result.meta.num_urgent_terms }}</div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+
+            {% elif mode == "URL" %}
+                <div class="result-section">
+                    <div class="result-display">
+                        <div class="result-main">
+                            <span class="result-badge {{ 'phishing' if result.binary_pred == 1 else ('safe' if result.binary_pred == 0 else 'suspicious') }}">
+                                {{ result.label }}
+                            </span>
+                            <div class="confidence-display">
+                                <div class="confidence-bar-large">
+                                    <div class="confidence-fill-large" style="
+                                        background: {{ 'var(--danger-color)' if result.binary_pred == 1 else ('var(--success-color)' if result.binary_pred == 0 else 'var(--warning-color)') }}; width: {{ (result.confidence * 100) }}%;
+                                    "></div>
+                                </div>
+                                <span class="confidence-percentage">
+                                    {{ (result.confidence * 100) | round(2) }}%
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            {% elif mode == "Hybrid" %}
+                <div class="result-section">
+                    <h4 class="section-title">🎯 Final Assessment</h4>
+                    <div class="result-display">
+                        <div class="result-main">
+                            <span class="result-badge {{ 'phishing' if result.final_binary_pred == 1 else 'safe' }}">
+                                {{ result.final_label }}
+                            </span>
+                            <div class="confidence-display">
+                                <div class="confidence-bar-large">
+                                    <div class="confidence-fill-large" style="
+                                        background: {{ 'var(--danger-color)' if result.final_binary_pred == 1 else 'var(--success-color)' }}; width: {{ (result.final_proba * 100) }}%;
+                                    "></div>
+                                </div>
+                                <span class="confidence-percentage">
+                                    {{ (result.final_proba * 100) | round(2) }}%
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hybrid-analysis">
+                        <div class="analysis-branch">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>📧 Email Analysis</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="branch-result">
+                                        <span class="result-badge {{ 'phishing' if result.email_branch.binary_pred == 1 else 'safe' }}">
+                                            {{ result.email_branch.label }}
+                                        </span>
+                                        <span class="branch-confidence">
+                                            {{ (result.email_branch.probability * 100) | round(2) }}%
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="analysis-branch">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>🔗 URL Analysis</h4>
+                                </div>
+                                <div class="card-body">
+                                    {% if result.url_branch %}
+                                        {% for url_result in result.url_branch %}
+                                            <div class="url-result-item">
+                                                <div class="url-display">{{ url_result.url }}</div>
+                                                <div class="url-result">
+                                                    <span class="result-badge {{ 'phishing' if url_result.binary_pred == 1 else ('safe' if url_result.binary_pred == 0 else 'suspicious') }}">
+                                                        {{ url_result.label }}
+                                                    </span>
+                                                    <span class="branch-confidence">
+                                                        {{ (url_result.confidence * 100) | round(2) }}%
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p class="no-urls">No URLs detected in content</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Feedback Section -->
+    <div class="card">
+        <div class="card-header">
+            <h3>💬 Provide Feedback</h3>
+            <p>Help us improve by rating the accuracy of this detection</p>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ url_for('feedback') }}" class="feedback-form">
+                <input type="hidden" name="detection_id" value="{{ detection_id }}">
+                
+                <div class="form-group">
+                    <label>Was this detection accurate?</label>
+                    <div class="feedback-options">
+                        <div class="feedback-option">
+                            <input type="radio" id="correct" name="feedback_type" value="correct" required>
+                            <label for="correct">
+                                <span class="feedback-icon">✅</span>
+                                Correct
+                            </label>
+                        </div>
+                        <div class="feedback-option">
+                            <input type="radio" id="incorrect" name="feedback_type" value="incorrect" required>
+                            <label for="incorrect">
+                                <span class="feedback-icon">❌</span>
+                                Incorrect
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="comments">Additional Comments (Optional)</label>
+                    <textarea id="comments" name="comments" class="form-control" rows="3" 
+                              placeholder="Please share any additional details about this detection..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    <span class="btn-icon">📤</span>
+                    Submit Feedback
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Enhanced AI explanations styling */
+.ai-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.ai-icon {
+    font-size: 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.ai-explanations-enhanced {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.explanation-card {
+    padding: var(--space-5);
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-xl);
+    border: 1px solid rgba(37, 99, 235, 0.1);
+    border-left: 4px solid var(--primary-500);
+    position: relative;
+    overflow: hidden;
+    transition: all var(--duration-300) var(--ease-out);
+}
+
+.explanation-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary-500), var(--success-500));
+    opacity: 0;
+    transition: opacity var(--duration-300) var(--ease-out);
+}
+
+.explanation-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.1);
+    border-color: rgba(37, 99, 235, 0.2);
+}
+
+.explanation-card:hover::before {
+    opacity: 1;
+}
+
+.explanation-content {
+    color: var(--text-primary);
+    line-height: 1.7;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.explanation-content strong {
+    color: var(--primary-600);
+    font-weight: 700;
+}
+
+/* Enhanced result display */
+.result-display {
+    margin-bottom: var(--space-6);
+}
+
+.result-main {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+    flex-wrap: wrap;
+}
+
+.confidence-display {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex: 1;
+    min-width: 200px;
+}
+
+.confidence-bar-large {
+    flex: 1;
+    height: 14px;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.confidence-fill-large {
+    height: 100%;
+    border-radius: var(--radius-full);
+    transition: width var(--duration-700) var(--ease-out);
+    background: linear-gradient(90deg, currentColor, rgba(255, 255, 255, 0.2));
+    position: relative;
+}
+
+.confidence-fill-large::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.confidence-percentage {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    min-width: 70px;
+    text-align: right;
+}
+
+.section-title {
+    color: var(--primary-600);
+    margin-bottom: var(--space-4);
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.hybrid-analysis {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-6);
+    margin-top: var(--space-6);
+}
+
+.analysis-branch .card {
+    margin-bottom: 0;
+    height: 100%;
+}
+
+.branch-result {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.branch-confidence {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.url-result-item {
+    margin-bottom: var(--space-4);
+    padding: var(--space-3);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+}
+
+.url-display {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-2);
+    font-family: var(--font-mono);
+    word-break: break-all;
+}
+
+.url-result {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+}
+
+.no-urls {
+    color: var(--text-secondary);
+    font-style: italic;
+    text-align: center;
+    padding: var(--space-4);
+}
+
+.feedback-options {
+    display: flex;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+.feedback-option {
+    flex: 1;
+}
+
+.feedback-option input[type="radio"] {
+    display: none;
+}
+
+.feedback-option label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--duration-200) var(--ease-out);
+    background: var(--bg-glass);
+    backdrop-filter: blur(10px);
+    font-weight: 600;
+}
+
+.feedback-option input[type="radio"]:checked + label {
+    background: var(--primary-500);
+    color: white;
+    border-color: var(--primary-500);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+}
+
+.feedback-option label:hover {
+    border-color: var(--primary-400);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.feedback-icon {
+    font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+    .result-main {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .confidence-display {
+        min-width: auto;
+    }
+    
+    .hybrid-analysis {
+        grid-template-columns: 1fr;
+    }
+    
+    .feedback-options {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}

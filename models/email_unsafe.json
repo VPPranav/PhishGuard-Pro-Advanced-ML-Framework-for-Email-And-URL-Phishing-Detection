@@ -1,0 +1,68 @@
+{
+  "phishing_keywords": {
+    "urgency_and_threats": [
+      "Action Required",
+      "Urgent",
+      "Immediate action",
+      "Final notice",
+      "Last chance",
+      "Suspended",
+      "Deactivated",
+      "Account locked",
+      "Problem with your account",
+      "Security alert",
+      "Expiring",
+      "Password is about to expire",
+      "Legal action",
+      "Account closure"
+    ],
+    "financial_and_account_related": [
+      "Invoice",
+      "Payment",
+      "ACH",
+      "Wire transfer",
+      "Remittance",
+      "Receipt",
+      "Balance due",
+      "Refund",
+      "otp",
+      "verify",
+      "Reimbursement",
+      "Verification",
+      "Confirm your details",
+      "Update your billing information",
+      "Compromised",
+      "Login now",
+      "Credentials"
+    ],
+    "too_good_to_be_true_offers": [
+      "Free prize",
+      "Free gift card",
+      "Free trial",
+      "You have won a lottery",
+      "Prize",
+      "Award",
+      "Claim your prize",
+      "Exclusive offer",
+      "Limited-time deal",
+      "Once-in-a-lifetime opportunity"
+    ],
+    "generic_and_impersonal_language": [
+      "Dear Customer",
+      "Dear Valued Customer",
+      "Dear Account Holder",
+      "Dear Sir/Madam",
+      "Your account",
+      "New Message",
+      "Notification",
+      "Document"
+    ]
+  },
+  "other_red_flags": [
+    "Spelling and grammar errors",
+    "Suspicious sender email address (e.g., typos in domain)",
+    "Unexpected attachments (especially .exe, .zip, .scr)",
+    "Mismatched links (hover-over URL is different from display text)",
+    "Requests for sensitive personal information (password, SSN, credit card details)"
+  ]
+}

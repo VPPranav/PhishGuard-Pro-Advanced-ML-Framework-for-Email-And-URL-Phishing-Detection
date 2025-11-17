@@ -1,0 +1,481 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - PhishGuard Pro{% endblock %}
+
+{% block content %}
+<head>
+    <!-- Font Awesome CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-aVF+z/..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+</head>
+<div class="container">
+    <div class="page-header">
+        <div class="page-title-section">
+            <h1 class="page-title">Personal Analytics Dashboard</h1>
+            <p class="page-subtitle">Comprehensive overview of your phishing detection history and patterns</p>
+        </div>
+        <div class="page-actions">
+            <button class="btn btn-outline" onclick="exportAnalytics()">
+                <span class="btn-icon"><i class="fas fa-chart-bar"></i></span>
+                Export Data
+            </button>
+            <button class="btn btn-primary" onclick="refreshAnalytics()">
+                <span class="btn-icon"><i class="fas fa-sync-alt"></i></span>
+                Refresh
+            </button>
+
+        </div>
+    </div>
+
+    <!-- Summary Statistics -->
+    <div class="analytics-grid">
+        <div class="stat-card primary">
+             <div class="stat-icon"><i class="fas fa-bullseye" style="color: rgb(96, 180, 236);"></i></div>
+            <div class="stat-content">
+                <div class="stat-number" data-count="{{ analytics.total_detections }}">{{ analytics.total_detections }}</div>
+                <div class="stat-label">Total Detections</div>
+                <div class="stat-trend positive">Your Activity</div>
+            </div>
+        </div>
+        <div class="stat-card danger">
+            <div class="stat-icon"><i class="fas fa-exclamation-triangle"  style="color: rgb(236, 96, 96);" ></i></div>
+            <div class="stat-content">
+                <div class="stat-number" data-count="{{ analytics.phishing_count }}">{{ analytics.phishing_count }}</div>
+                <div class="stat-label">Threats Detected</div>
+                <div class="stat-trend negative">Blocked by You</div>
+            </div>
+        </div>
+        <div class="stat-card success">
+            <div class="stat-icon"><i class="fas fa-check-circle"  style="color: rgb(96, 236, 112);"></i></div>
+            <div class="stat-content">
+                <div class="stat-number" data-count="{{ analytics.safe_count }}">{{ analytics.safe_count }}</div>
+                <div class="stat-label">Safe Content</div>
+                <div class="stat-trend positive">Verified Safe</div>
+            </div>
+        </div>
+        <div class="stat-card info">
+            <div class="stat-icon"><i class="fas fa-chart-line"  style="color: rgb(236, 222, 96);"></i></div>
+            <div class="stat-content">
+                <div class="stat-number">
+                    {% if analytics.total_detections > 0 %}
+                        {{ "%.1f"|format((analytics.phishing_count / analytics.total_detections) * 100) }}%
+                    {% else %}
+                        0%
+                    {% endif %}
+                </div>
+                <div class="stat-label">Your Detection Rate</div>
+                <div class="stat-trend neutral">Personal Stats</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Charts Section -->
+<div class="charts-grid">
+    <!-- Time Series Chart -->
+    <div class="chart-card full-width">
+        <div class="chart-header">
+            <h3 class="chart-title">Your Detection Timeline</h3>
+            <div class="chart-controls">
+                <select class="chart-filter" onchange="updateTimelineChart(this.value)">
+                    <option value="7">Last 7 days</option>
+                    <option value="30" selected>Last 30 days</option>
+                    <option value="90">Last 90 days</option>
+                </select>
+            </div>
+        </div>
+        <div class="chart-container">
+            <canvas id="timelineChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Detection Mode Breakdown -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3 class="chart-title">Your Detection Modes</h3>
+        </div>
+        <div class="chart-container">
+            <canvas id="modeChart"></canvas>
+        </div>
+        <div class="chart-legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: rgb(37, 99, 235);"></div>
+                <span>Email ({{ analytics.email_detections }})</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: rgb(5, 150, 105);"></div>
+                <span>URL ({{ analytics.url_detections }})</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: rgb(217, 119, 6);"></div>
+                <span>Hybrid ({{ analytics.hybrid_detections }})</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- New: Detection Trends by Mode -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3 class="chart-title">Detection Trends by Mode</h3>
+            <p class="chart-subtitle">Weekly comparison of Email, URL, and Hybrid detections</p>
+        </div>
+        <div class="chart-container">
+            <canvas id="modeTrendChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Threat vs Safe Ratio -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3 class="chart-title">Your Threat Analysis</h3>
+        </div>
+        <div class="chart-container">
+            <canvas id="threatChart"></canvas>
+        </div>
+        <div class="threat-stats">
+            <div class="threat-stat">
+                <span class="threat-label">Your Phishing Rate</span>
+                <span class="threat-value danger">
+                    {% if analytics.total_detections > 0 %}
+                        {{ "%.1f"|format((analytics.phishing_count / analytics.total_detections) * 100) }}%
+                    {% else %}
+                        0%
+                    {% endif %}
+                </span>
+            </div>
+            <div class="threat-stat">
+                <span class="threat-label">Your Safety Rate</span>
+                <span class="threat-value success">
+                    {% if analytics.total_detections > 0 %}
+                        {{ "%.1f"|format((analytics.safe_count / analytics.total_detections) * 100) }}%
+                    {% else %}
+                        100%
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Advanced Analytics Charts -->
+<div class="charts-grid">
+    <!-- Detection Rate Bar Chart -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3 class="chart-title">Your Detection Rate by Mode</h3>
+            <p class="chart-subtitle">Safe vs phishing detections across different analysis modes</p>
+        </div>
+        <div class="chart-container">
+            <canvas id="detectionRateChart"></canvas>
+        </div>
+    </div>
+
+    <!-- New: Confidence Trend Over Time -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3 class="chart-title">Detection Confidence Over Time</h3>
+            <p class="chart-subtitle">Average confidence scores across recent days</p>
+        </div>
+        <div class="chart-container">
+            <canvas id="confidenceTrendChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Confidence Score Distribution -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3 class="chart-title">Confidence Score Distribution</h3>
+            <p class="chart-subtitle">Distribution of AI confidence scores in your detections</p>
+        </div>
+        <div class="chart-container">
+            <canvas id="confidenceChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Weekly Activity Heatmap -->
+    <div class="chart-card full-width">
+        <div class="chart-header">
+            <h3 class="chart-title">Your Weekly Activity Pattern</h3>
+            <p class="chart-subtitle">Heatmap showing your detection activity by day and hour</p>
+        </div>
+        <div class="chart-container">
+            <canvas id="activityHeatmap"></canvas>
+        </div>
+    </div>
+</div>
+
+
+    <!-- Performance Metrics -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-bolt" style="color: rgb(243, 174, 24);"></i></div>
+            <div class="metric-content">
+                <div class="metric-value">
+                    {% if analytics.total_detections > 0 %}
+                        {{ "%.2f"|format(analytics.total_detections / 30) }}
+                    {% else %}
+                        0.00
+                    {% endif %}
+                </div>
+                <div class="metric-label">Avg Daily Detections</div>
+                <div class="metric-description">Your average detection activity per day</div>
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-bullseye" style="color: rgb(75, 55, 190);"></i></div>
+            <div class="metric-content">
+                <div class="metric-value">
+                    {% if analytics.total_detections > 0 %}
+                        {{ "%.1f"|format((analytics.phishing_count / analytics.total_detections) * 100) }}%
+                    {% else %}
+                        0%
+                    {% endif %}
+                </div>
+                <div class="metric-label">Threat Detection Rate</div>
+                <div class="metric-description">Percentage of threats you've identified</div>
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-shield-alt" style="color: rgb(138, 138, 236);"></i></div>
+            <div class="metric-content">
+                <div class="metric-value">{{ analytics.phishing_count }}</div>
+                <div class="metric-label">Threats Blocked</div>
+                <div class="metric-description">Total phishing attempts you've prevented</div>
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <div class="metric-icon"><i class="fas fa-chart-bar" style="color: rgb(237, 241, 119);"></i></div>
+            <div class="metric-content">
+                <div class="metric-value">
+                    {% set most_used = 'Email' if analytics.email_detections >= analytics.url_detections and analytics.email_detections >= analytics.hybrid_detections else ('URL' if analytics.url_detections >= analytics.hybrid_detections else 'Hybrid') %}
+                    {{ most_used }}
+                </div>
+                <div class="metric-label">Most Used Mode</div>
+                <div class="metric-description">Your preferred detection method</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Detection History -->
+    <div class="data-table-card">
+        <div class="table-header">
+            <h3 class="table-title">Your Recent Detection History</h3>
+            <div class="table-actions">
+                <input type="text" class="table-search" placeholder="Search your detections..." onkeyup="filterTable(this.value)">
+                <button class="btn btn-sm btn-outline" onclick="exportTableData()">
+                    <span class="btn-icon"><i class="fas fa-file-alt"></i></span>
+                    Export
+                </button>
+            </div>
+        </div>
+        <div class="table-container">
+            {% if analytics.detections %}
+                <table class="data-table" id="detectionsTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Mode</th>
+                            <th>Result</th>
+                            <th>Confidence</th>
+                            <th>Input Preview</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for detection in analytics.detections[:50] %}
+                        <tr>
+                            <td>
+                                <div class="date-cell">
+                                    <span class="date-primary">{{ detection.timestamp.strftime('%Y-%m-%d') }}</span>
+                                    <span class="date-secondary">{{ detection.timestamp.strftime('%H:%M') }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="mode-badge {{ detection.mode }}">
+                                    {% if detection.mode == 'email' %}📧
+                                    {% elif detection.mode == 'url' %}🔗
+                                    {% else %}🔍{% endif %}
+                                    {{ detection.mode.title() }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if detection.mode == 'hybrid' %}
+                                    {% set label = detection.result.get('final_label', 'Unknown') %}
+                                    {% set is_phishing = detection.result.get('final_binary_pred', 0) == 1 %}
+                                {% else %}
+                                    {% set label = detection.result.get('label', 'Unknown') %}
+                                    {% set is_phishing = detection.result.get('binary_pred', 0) == 1 %}
+                                {% endif %}
+                                
+                                <span class="result-badge {{ 'phishing' if is_phishing else 'safe' }}">
+                                    {{ label }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="confidence-cell">
+                                    {% if detection.mode == 'hybrid' %}
+                                        {% set confidence = detection.result.get('final_proba', 0) %}
+                                    {% else %}
+                                        {% set confidence = detection.result.get('probability', detection.result.get('confidence', 0)) %}
+                                    {% endif %}
+                                    <div class="confidence-bar">
+                                        <div class="confidence-fill" style="width: {{ confidence * 100 }}%;"></div>
+                                    </div>
+                                    <span class="confidence-text">{{ "%.1f"|format(confidence * 100) }}%</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="input-preview" title="{{ detection.input_text }}">
+                                    {{ detection.input_text[:50] }}{% if detection.input_text|length > 50 %}...{% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a href="{{ url_for('export_report', detection_id=detection._id) }}" 
+                                      <a class="btn btn-xs btn-outline" title="Export Report">
+                                        <i class="fas fa-file-alt" style="color: rgb(207, 233, 254);"></i>
+                                    </a>
+
+                                    <button class="btn btn-xs btn-outline" onclick="viewDetails('{{ detection._id }}')" title="View Details">
+                                        <i class="fas fa-eye" style="color: rgb(202, 245, 10);"></i>
+                                    </button>
+
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">📊</div>
+                    <h3 class="empty-title">No Detection History</h3>
+                    <p class="empty-description">Start analyzing content to see your personal detection history here.</p>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+                        <span class="btn-icon">🔍</span>
+                        Start Detection
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+window.analyticsData = {
+    totalDetections: {{ analytics.total_detections }},
+    phishingCount: {{ analytics.phishing_count }},
+    safeCount: {{ analytics.safe_count }},
+    emailDetections: {{ analytics.email_detections }},
+    urlDetections: {{ analytics.url_detections }},
+    hybridDetections: {{ analytics.hybrid_detections }},
+    detections: [
+        {% for detection in analytics.detections %}
+        {
+            id: "{{ detection._id }}",
+            mode: "{{ detection.mode }}",
+            timestamp: "{{ detection.timestamp.isoformat() }}",
+            result: {{ detection.result | tojson }},
+            inputText: {{ detection.input_text | tojson }}
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ]
+};
+
+// Initialize charts when page loads
+document.addEventListener('DOMContentLoaded', function() {
+
+    animateStatNumbers();
+    initializeAdvancedCharts();
+});
+</script>
+<!-- Load Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+<!-- Load analytics.js script -->
+<script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+
+
+
+<style>
+
+    .charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  justify-content: stretch;
+}
+.charts-grid > .chart-card {
+  width: 100%;
+}
+
+/* Performance Metrics Section */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.metric-card {
+  background: linear-gradient(135deg, #1f2937, #111827);
+  padding: 1.5rem;
+  border-radius: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.5rem;
+  position: relative;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.45);
+}
+
+.metric-icon {
+  font-size: 1.6rem;
+  margin-bottom: 0.5rem;
+  background: rgba(255,255,255,0.08);
+  padding: 0.5rem;
+  border-radius: 0.75rem;
+}
+
+.metric-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.metric-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #f9fafb;
+  letter-spacing: -0.5px;
+}
+
+.metric-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #d1d5db;
+}
+
+.metric-description {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  line-height: 1.3;
+}
+
+/* Accent colors for specific metrics (optional) */
+.metric-card:nth-child(1) .metric-icon { color: #facc15; } /* ⚡ yellow */
+.metric-card:nth-child(2) .metric-icon { color: #ef4444; } /* 🎯 red */
+.metric-card:nth-child(3) .metric-icon { color: #22c55e; } /* 🛡️ green */
+.metric-card:nth-child(4) .metric-icon { color: #3b82f6; } /* 📊 blue */
+</style>
+
+{% endblock %}

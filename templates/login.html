@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Login - PhishGuard Pro{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="auth-card">
+        <h1 style="margin-bottom: 0.1rem;">Sign In</h1>
+        <p class="text-center mb-3" style="color: var(--text-secondary); margin-top: none">
+            Access your phishing detection dashboard
+        </p>
+        
+        <form method="post" action="{{ url_for('login') }}">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;margin-bottom: 2rem;">
+                Sign In
+            </button>
+        </form>
+        
+        <p class="text-center mt-3">
+            New to PhishGuard Pro? 
+            <a href="{{ url_for('signup') }}" style="color: rgb(19, 175, 241); text-decoration: none; font-weight: bold;">
+    Create an account
+</a>
+
+        </p>
+    </div>
+</div>
+{% endblock %}

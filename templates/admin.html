@@ -1,0 +1,531 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - PhishGuard Pro{% endblock %}
+
+{% block content %}
+<!-- Enhanced admin dashboard with better layout and professional styling -->
+<div class="container">
+    <div class="page-header">
+        <div class="page-title-section">
+            <h1 class="page-title">
+                <span class="page-icon">🔐</span>
+                System Administration
+            </h1>
+            <p class="page-subtitle">Comprehensive system monitoring and user management dashboard</p>
+        </div>
+        <div class="page-actions">
+            <button class="btn btn-outline" onclick="exportSystemReport()">
+                <span class="btn-icon">📊</span>
+                System Report
+            </button>
+            <button class="btn btn-primary" onclick="refreshSystemData()">
+                <span class="btn-icon">🔄</span>
+                Refresh Data
+            </button>
+        </div>
+    </div>
+
+    <!-- Enhanced System Overview -->
+    <div class="analytics-grid">
+        <div class="stat-card primary">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-content">
+                <div class="stat-number" data-count="{{ analytics.total_detections }}">{{ analytics.total_detections }}</div>
+                <div class="stat-label">System Detections</div>
+                <div class="stat-trend positive">All Users</div>
+            </div>
+        </div>
+        <div class="stat-card danger">
+            <div class="stat-icon">⚠️</div>
+            <div class="stat-content">
+                <div class="stat-number" data-count="{{ analytics.phishing_count }}">{{ analytics.phishing_count }}</div>
+                <div class="stat-label">Threats Detected</div>
+                <div class="stat-trend negative">System Wide</div>
+            </div>
+        </div>
+        <div class="stat-card info">
+            <div class="stat-icon">📞</div>
+            <div class="stat-content">
+                <div class="stat-number" data-count="{{ contacts|length }}">{{ contacts|length }}</div>
+                <div class="stat-label">Contact Inquiries</div>
+                <div class="stat-trend neutral">Pending</div>
+            </div>
+        </div>
+        <div class="stat-card success">
+            <div class="stat-icon">💬</div>
+            <div class="stat-content">
+                <div class="stat-number" data-count="{{ feedback|length }}">{{ feedback|length }}</div>
+                <div class="stat-label">User Feedback</div>
+                <div class="stat-trend positive">Total</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Performance Dashboard -->
+    <div class="chart-card full-width" style="margin-bottom: 2rem;">
+        <div class="chart-header">
+            <h3 class="chart-title">System Performance Overview</h3>
+            <p class="chart-subtitle">Real-time system metrics and performance indicators</p>
+        </div>
+        <div class="performance-grid">
+            <div class="performance-metric">
+                <div class="metric-icon">📧</div>
+                <div class="metric-content">
+                    <div class="metric-number">{{ analytics.email_detections }}</div>
+                    <div class="metric-label">Email Analyses</div>
+                    <div class="metric-bar">
+                        <div class="metric-fill" style="width: {{ (analytics.email_detections / (analytics.total_detections or 1)) * 100 }}%; background: rgb(37, 99, 235);"></div>
+                    </div>
+                    <div class="metric-description">
+                        {{ "%.1f"|format((analytics.email_detections / (analytics.total_detections or 1)) * 100) }}% of total
+                    </div>
+                </div>
+            </div>
+            <div class="performance-metric">
+                <div class="metric-icon">🔗</div>
+                <div class="metric-content">
+                    <div class="metric-number">{{ analytics.url_detections }}</div>
+                    <div class="metric-label">URL Analyses</div>
+                    <div class="metric-bar">
+                        <div class="metric-fill" style="width: {{ (analytics.url_detections / (analytics.total_detections or 1)) * 100 }}%; background: rgb(5, 150, 105);"></div>
+                    </div>
+                    <div class="metric-description">
+                        {{ "%.1f"|format((analytics.url_detections / (analytics.total_detections or 1)) * 100) }}% of total
+                    </div>
+                </div>
+            </div>
+            <div class="performance-metric">
+                <div class="metric-icon">🔍</div>
+                <div class="metric-content">
+                    <div class="metric-number">{{ analytics.hybrid_detections }}</div>
+                    <div class="metric-label">Hybrid Analyses</div>
+                    <div class="metric-bar">
+                        <div class="metric-fill" style="width: {{ (analytics.hybrid_detections / (analytics.total_detections or 1)) * 100 }}%; background: rgb(217, 119, 6);"></div>
+                    </div>
+                    <div class="metric-description">
+                        {{ "%.1f"|format((analytics.hybrid_detections / (analytics.total_detections or 1)) * 100) }}% of total
+                    </div>
+                </div>
+            </div>
+            <div class="performance-metric">
+                <div class="metric-icon">🎯</div>
+                <div class="metric-content">
+                    <div class="metric-number">
+                        {% if analytics.total_detections > 0 %}
+                            {{ "%.1f"|format((analytics.phishing_count / analytics.total_detections) * 100) }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </div>
+                    <div class="metric-label">Detection Rate</div>
+                    <div class="metric-bar">
+                        <div class="metric-fill" style="width: 95%; background: rgb(16, 185, 129);"></div>
+                    </div>
+                    <div class="metric-description">System accuracy rate</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Admin Tabs -->
+    <div class="admin-tabs">
+        <div class="tab-nav">
+            <button class="tab-button active" onclick="switchTab('contacts')">
+                <span class="tab-icon">📞</span>
+                <span class="tab-text">Contact Inquiries</span>
+                <span class="tab-badge">{{ contacts|length }}</span>
+            </button>
+            <button class="tab-button" onclick="switchTab('feedback')">
+                <span class="tab-icon">💬</span>
+                <span class="tab-text">User Feedback</span>
+                <span class="tab-badge">{{ feedback|length }}</span>
+            </button>
+            <button class="tab-button" onclick="switchTab('detections')">
+                <span class="tab-icon">🔍</span>
+                <span class="tab-text">System Detections</span>
+                <span class="tab-badge">{{ analytics.detections|length }}</span>
+            </button>
+            <button class="tab-button" onclick="switchTab('analytics')">
+                <span class="tab-icon">📊</span>
+                <span class="tab-text">System Analytics</span>
+            </button>
+        </div>
+
+        <!-- Contact Inquiries Tab -->
+        <div class="tab-content active" id="contacts-tab">
+            <div class="data-table-card">
+                <div class="table-header">
+                    <h3 class="table-title">Contact Inquiries Management</h3>
+                    <div class="table-actions">
+                        <input type="text" class="table-search" placeholder="Search contacts..." onkeyup="filterContactsTable(this.value)">
+                        <button class="btn btn-sm btn-outline" onclick="exportContacts()">
+                            <span class="btn-icon">📄</span>
+                            Export
+                        </button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    {% if contacts %}
+                        <table class="data-table" id="contactsTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Contact Info</th>
+                                    <th>Subject</th>
+                                    <th>Message Preview</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for contact in contacts[:20] %}
+                                <tr>
+                                    <td>
+                                        <div class="date-cell">
+                                            <span class="date-primary">{{ contact.timestamp.strftime('%Y-%m-%d') }}</span>
+                                            <span class="date-secondary">{{ contact.timestamp.strftime('%H:%M') }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="contact-info">
+                                            <div class="contact-name">{{ contact.name }}</div>
+                                            <div class="contact-email">{{ contact.email }}</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="subject-badge">{{ contact.subject }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="message-preview" title="{{ contact.message }}">
+                                            {{ contact.message[:80] }}{% if contact.message|length > 80 %}...{% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge {{ contact.status }}">
+                                            {{ contact.status.title() }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-xs btn-outline" onclick="viewContact('{{ contact._id }}')" title="View Full Message">
+                                                👁️
+                                            </button>
+                                            <button class="btn btn-xs btn-primary" onclick="replyContact('{{ contact.email }}')" title="Reply">
+                                                📧
+                                            </button>
+                                            <button class="btn btn-xs btn-success" onclick="markResolved('{{ contact._id }}')" title="Mark Resolved">
+                                                ✅
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="empty-state">
+                            <div class="empty-icon">📞</div>
+                            <h3 class="empty-title">No Contact Inquiries</h3>
+                            <p class="empty-description">No contact inquiries have been received yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- User Feedback Tab -->
+        <div class="tab-content" id="feedback-tab">
+            <div class="data-table-card">
+                <div class="table-header">
+                    <h3 class="table-title">User Feedback Analysis</h3>
+                    <div class="table-actions">
+                        <input type="text" class="table-search" placeholder="Search feedback..." onkeyup="filterFeedbackTable(this.value)">
+                        <button class="btn btn-sm btn-outline" onclick="exportFeedback()">
+                            <span class="btn-icon">📄</span>
+                            Export
+                        </button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    {% if feedback %}
+                        <table class="data-table" id="feedbackTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>User</th>
+                                    <th>Feedback Type</th>
+                                    <th>Comments</th>
+                                    <th>Detection ID</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fb in feedback[:20] %}
+                                <tr>
+                                    <td>
+                                        <div class="date-cell">
+                                            <span class="date-primary">{{ fb.timestamp.strftime('%Y-%m-%d') }}</span>
+                                            <span class="date-secondary">{{ fb.timestamp.strftime('%H:%M') }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="user-cell">
+                                            <span class="user-name">{{ fb.username }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="feedback-badge {{ fb.feedback_type }}">
+                                            {% if fb.feedback_type == 'correct' %}✅{% else %}❌{% endif %}
+                                            {{ fb.feedback_type.title() }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="comments-preview" title="{{ fb.comments or 'No comments' }}">
+                                            {{ fb.comments[:60] if fb.comments else 'No comments' }}{% if fb.comments and fb.comments|length > 60 %}...{% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <code class="detection-id">{{ fb.detection_id[:8] }}...</code>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-xs btn-outline" onclick="viewFeedback('{{ fb._id }}')" title="View Details">
+                                                👁️
+                                            </button>
+                                            <button class="btn btn-xs btn-info" onclick="analyzeFeedback('{{ fb._id }}')" title="Analyze">
+                                                🔍
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="empty-state">
+                            <div class="empty-icon">💬</div>
+                            <h3 class="empty-title">No User Feedback</h3>
+                            <p class="empty-description">No user feedback has been received yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- System Detections Tab -->
+        <div class="tab-content" id="detections-tab">
+            <div class="data-table-card">
+                <div class="table-header">
+                    <h3 class="table-title">System Detection Monitor</h3>
+                    <div class="table-actions">
+                        <input type="text" class="table-search" placeholder="Search detections..." onkeyup="filterDetectionsTable(this.value)">
+                        <button class="btn btn-sm btn-outline" onclick="exportDetections()">
+                            <span class="btn-icon">📄</span>
+                            Export
+                        </button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    {% if analytics.detections %}
+                        <table class="data-table" id="systemDetectionsTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>User</th>
+                                    <th>Mode</th>
+                                    <th>Result</th>
+                                    <th>Confidence</th>
+                                    <th>Input Preview</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for detection in analytics.detections[:30] %}
+                                <tr>
+                                    <td>
+                                        <div class="date-cell">
+                                            <span class="date-primary">{{ detection.timestamp.strftime('%Y-%m-%d') }}</span>
+                                            <span class="date-secondary">{{ detection.timestamp.strftime('%H:%M') }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="user-cell">{{ detection.username }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="mode-badge {{ detection.mode }}">
+                                            {% if detection.mode == 'email' %}📧
+                                            {% elif detection.mode == 'url' %}🔗
+                                            {% else %}🔍{% endif %}
+                                            {{ detection.mode.title() }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if detection.mode == 'hybrid' %}
+                                            {% set label = detection.result.get('final_label', 'Unknown') %}
+                                            {% set is_phishing = detection.result.get('final_binary_pred', 0) == 1 %}
+                                        {% else %}
+                                            {% set label = detection.result.get('label', 'Unknown') %}
+                                            {% set is_phishing = detection.result.get('binary_pred', 0) == 1 %}
+                                        {% endif %}
+                                        
+                                        <span class="result-badge {{ 'phishing' if is_phishing else 'safe' }}">
+                                            {{ label }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="confidence-cell">
+                                            {% if detection.mode == 'hybrid' %}
+                                                {% set confidence = detection.result.get('final_proba', 0) %}
+                                            {% else %}
+                                                {% set confidence = detection.result.get('probability', detection.result.get('confidence', 0)) %}
+                                            {% endif %}
+                                            <div class="confidence-bar">
+                                                <div class="confidence-fill" style="width: {{ confidence * 100 }}%;"></div>
+                                            </div>
+                                            <span class="confidence-text">{{ "%.1f"|format(confidence * 100) }}%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="input-preview" title="{{ detection.input_text }}">
+                                            {{ detection.input_text[:50] }}{% if detection.input_text|length > 50 %}...{% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-xs btn-outline" onclick="viewSystemDetection('{{ detection._id }}')" title="View Details">
+                                                👁️
+                                            </button>
+                                            <button class="btn btn-xs btn-info" onclick="analyzeDetection('{{ detection._id }}')" title="Analyze">
+                                                🔍
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="empty-state">
+                            <div class="empty-icon">🔍</div>
+                            <h3 class="empty-title">No System Detections</h3>
+                            <p class="empty-description">No detections have been performed yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- System Analytics Tab -->
+        <div class="tab-content" id="analytics-tab">
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">System Performance</h3>
+                        <p class="chart-subtitle">Overall system metrics</p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="systemPerformanceChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">User Activity</h3>
+                        <p class="chart-subtitle">Active users and engagement</p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="userActivityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+window.adminData = {
+    totalDetections: {{ analytics.total_detections }},
+    phishingCount: {{ analytics.phishing_count }},
+    contactsCount: {{ contacts|length }},
+    feedbackCount: {{ feedback|length }}
+};
+
+// Initialize admin dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    animateStatNumbers();
+    initializeAdminCharts();
+});
+
+function initializeAdminCharts() {
+    // System performance chart
+    const perfCtx = document.getElementById('systemPerformanceChart');
+    if (perfCtx && typeof Chart !== 'undefined') {
+        new Chart(perfCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Email', 'URL', 'Hybrid'],
+                datasets: [{
+                    data: [{{ analytics.email_detections }}, {{ analytics.url_detections }}, {{ analytics.hybrid_detections }}],
+                    backgroundColor: ['rgb(37, 99, 235)', 'rgb(5, 150, 105)', 'rgb(217, 119, 6)']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+    
+    // User activity chart
+    const actCtx = document.getElementById('userActivityChart');
+    if (actCtx && typeof Chart !== 'undefined') {
+        new Chart(actCtx, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Active Users',
+                    data: [12, 19, 15, 25, 22, 18, 14],
+                    borderColor: 'rgb(37, 99, 235)',
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+}
+
+// Enhanced admin functions
+function markResolved(contactId) {
+    showNotification("Contact marked as resolved", "success");
+}
+
+function analyzeFeedback(feedbackId) {
+    showNotification("Feedback analysis feature coming soon!", "info");
+}
+
+function analyzeDetection(detectionId) {
+    showNotification("Detection analysis feature coming soon!", "info");
+}
+
+function exportContacts() {
+    showNotification("Exporting contacts...", "info");
+}
+
+function exportFeedback() {
+    showNotification("Exporting feedback...", "info");
+}
+
+function exportDetections() {
+    showNotification("Exporting detections...", "info");
+}
+</script>
+<!-- Load Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+<!-- Load analytics.js for shared functionality -->
+<script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+{% endblock %}

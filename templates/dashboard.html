@@ -1,0 +1,510 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - PhishGuard Pro{% endblock %}
+
+{% block content %}
+
+<style>
+    /* ===== 3D Floating Background Animation ===== */
+.background-3d {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: -1;
+    perspective: 1200px;
+    background: radial-gradient(circle at center, #031b33 0%, #000 100%);
+}
+
+/* Floating orbs (soft glowing shapes) */
+.background-3d span {
+    position: absolute;
+    display: block;
+    border-radius: 50%;
+    opacity: 0.3;
+    background: radial-gradient(circle at center, rgba(0,255,255,0.6), transparent 70%);
+    animation: float3D 25s ease-in-out infinite;
+    transform-style: preserve-3d;
+}
+
+/* Different sizes and animation delays for depth */
+.background-3d span:nth-child(1) {
+    width: 150px;
+    height: 150px;
+    left: 10%;
+    top: 20%;
+    animation-delay: 0s;
+}
+.background-3d span:nth-child(2) {
+    width: 220px;
+    height: 220px;
+    left: 70%;
+    top: 40%;
+    animation-delay: 5s;
+    background: radial-gradient(circle at center, rgba(255,0,150,0.5), transparent 70%);
+}
+.background-3d span:nth-child(3) {
+    width: 180px;
+    height: 180px;
+    left: 40%;
+    top: 70%;
+    animation-delay: 10s;
+    background: radial-gradient(circle at center, rgba(0,255,150,0.5), transparent 70%);
+}
+
+@keyframes float3D {
+    0%, 100% {
+        transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg);
+    }
+    25% {
+        transform: translate3d(30px, -40px, 80px) rotateX(10deg) rotateY(5deg);
+    }
+    50% {
+        transform: translate3d(-20px, 20px, -60px) rotateX(-10deg) rotateY(-10deg);
+    }
+    75% {
+        transform: translate3d(40px, 10px, 100px) rotateX(5deg) rotateY(10deg);
+    }
+}
+
+    /* =========================
+       Subtle Futuristic Gradient Animation
+    ========================== */
+    @keyframes slowColorShift {
+        0% {
+            background: linear-gradient(135deg, #03255b 0%, #95f6ff 180%);
+        }
+        50% {
+            background: linear-gradient(135deg, #153805 0%, #c7ffbb 100%);
+        }
+        100% {
+            background: linear-gradient(135deg, #820b0b 0%, #f09f9f 100%);
+        }
+    }
+
+    /* Gentle floating motion for the card */
+    @keyframes smoothFloat {
+        0%, 100% {
+            transform: translateY(0px) rotateX(0deg) rotateY(0deg);
+        }
+        50% {
+            transform: translateY(-10px) rotateX(2deg) rotateY(-2deg);
+        }
+    }
+
+    /* Roaming orb movement */
+    @keyframes roam {
+        0% { transform: translate(0, 0); opacity: 0.25; }
+        25% { transform: translate(50px, -40px); opacity: 0.35; }
+        50% { transform: translate(-30px, 30px); opacity: 0.2; }
+        75% { transform: translate(40px, 20px); opacity: 0.3; }
+        100% { transform: translate(0, 0); opacity: 0.25; }
+    }
+
+    /* Slow rotating holographic grid */
+    @keyframes rotateGrid {
+        0% { transform: rotate(0deg) scale(1); opacity: 0.15; }
+        50% { transform: rotate(180deg) scale(1.05); opacity: 0.2; }
+        100% { transform: rotate(360deg) scale(1); opacity: 0.15; }
+    }
+
+    /* Flowing light shimmer */
+    @keyframes shimmer {
+        0% { transform: translateX(-100%) skewX(-20deg); opacity: 0; }
+        50% { transform: translateX(0%) skewX(-20deg); opacity: 0.08; }
+        100% { transform: translateX(100%) skewX(-20deg); opacity: 0; }
+    }
+
+    .welcome-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 18px;
+        padding: 2.8rem;
+        color: #fff;
+        animation: slowColorShift 120s ease-in-out infinite, smoothFloat 12s ease-in-out infinite;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(14px);
+        transform-style: preserve-3d;
+        perspective: 1200px;
+    }
+
+    /* Ambient animations inside the card */
+    .welcome-card::before,
+    .welcome-card::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        z-index: 0;
+    }
+
+    /* Soft floating orb */
+    .welcome-card::before {
+        width: 220px;
+        height: 220px;
+        background: radial-gradient(circle, rgba(255,255,255,0.25) 0%, transparent 70%);
+        filter: blur(25px);
+        animation: roam 25s ease-in-out infinite;
+    }
+
+    /* Shimmer effect band */
+    .welcome-card::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -50%;
+        width: 200%;
+        height: 100%;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.15), transparent);
+        animation: shimmer 20s linear infinite;
+        z-index: 1;
+        mix-blend-mode: overlay;
+    }
+
+    /* Rotating holographic grid layer */
+    .grid-overlay {
+        position: absolute;
+        inset: 0;
+        background-image: linear-gradient(transparent 97%, rgba(255,255,255,0.08) 98%),
+                          linear-gradient(90deg, transparent 97%, rgba(255,255,255,0.08) 98%);
+        background-size: 40px 40px;
+        animation: rotateGrid 60s linear infinite;
+        z-index: 0;
+        pointer-events: none;
+        filter: blur(1px);
+    }
+
+    .welcome-card-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+    }
+
+    .welcome-header {
+    font-size: 2.8rem;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.75rem;
+    text-shadow: 0 3px 20px rgba(0, 0, 0, 0.4);
+    background: linear-gradient(90deg, #ffffff, #dffcff, #a5f3fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Ensure the username and emoji match perfectly */
+.welcome-header .user-name {
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+    background: inherit;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: inherit;
+}
+
+.welcome-header span,
+.welcome-header svg,
+.welcome-header emoji {
+    vertical-align: middle;
+}
+
+
+    .welcome-subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        font-weight: 400;
+        margin-bottom: 2rem;
+        color: rgba(255,255,255,0.85);
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.75rem;
+        margin-top: 1.5rem;
+    }
+
+    .feature-item {
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(8px);
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
+        transition: all 0.4s ease;
+        transform: translateZ(0);
+    }
+
+    .feature-item:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-8px) scale(1.03);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .feature-icon {
+        font-size: 2rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .feature-title {
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        font-size: 1.05rem;
+        letter-spacing: 0.3px;
+    }
+
+    .feature-desc {
+        font-size: 0.9rem;
+        opacity: 0.85;
+        line-height: 1.4;
+    }
+
+    .feature-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 60px;
+    margin-bottom: 1rem;
+    transition: transform 0.4s ease, filter 0.4s ease;
+    filter: drop-shadow(0 0 8px rgba(88, 156, 235, 0.3));
+}
+
+.feature-item:hover .feature-icon {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 15px rgba(88, 156, 235, 0.6));
+}
+
+.feature-item svg {
+    width: 40px;
+    height: 40px;
+}
+
+</style>
+
+
+<div class="container">
+    <!-- Welcome Card with 3D Animations -->
+    <div class="welcome-card"; style="margin-bottom: 0.1rem;">
+        <div class="grid-overlay"></div>
+        <div class="welcome-card-content">
+            <div class="welcome-header">Welcome,  <span class="user-name">{{ session.username }}</span> 👋</div>
+            <div class="welcome-subtitle">Your AI-Powered Phishing Detection Web Application</div>
+            <div class="features-grid">
+    <div class="feature-item">
+        <div class="feature-icon">
+            <!-- Smart Detection -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="url(#grad1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <defs>
+                    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#8ec5ff"/>
+                        <stop offset="100%" stop-color="#3b82f6"/>
+                    </linearGradient>
+                </defs>
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+        </div>
+        <div class="feature-title">Smart Detection</div>
+        <div class="feature-desc">Advanced AI models analyze emails and URLs in real-time.</div>
+    </div>
+
+    <div class="feature-item">
+        <div class="feature-icon">
+            <!-- Instant Analysis -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="url(#grad2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <defs>
+                    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#a5f3fc"/>
+                        <stop offset="100%" stop-color="#60a5fa"/>
+                    </linearGradient>
+                </defs>
+                <path d="M13 2L3 14h9l-1 8L21 10h-9l1-8z"></path>
+            </svg>
+        </div>
+        <div class="feature-title">Instant Analysis</div>
+        <div class="feature-desc">Get results in seconds with detailed threat assessments.</div>
+    </div>
+
+    <div class="feature-item">
+        <div class="feature-icon">
+            <!-- Multi-Mode Protection -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="url(#grad3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <defs>
+                    <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#93c5fd"/>
+                        <stop offset="100%" stop-color="#2563eb"/>
+                    </linearGradient>
+                </defs>
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+        </div>
+        <div class="feature-title">Multi-Mode Protection</div>
+        <div class="feature-desc">Email, URL, or hybrid analysis for comprehensive coverage.</div>
+    </div>
+
+    <div class="feature-item">
+        <div class="feature-icon">
+            <!-- Confidence Scores -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="url(#grad4)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <defs>
+                    <linearGradient id="grad4" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#93c5fd"/>
+                        <stop offset="100%" stop-color="#1e40af"/>
+                    </linearGradient>
+                </defs>
+                <path d="M3 3v18h18"></path>
+                <rect x="7" y="12" width="3" height="6" rx="1"></rect>
+                <rect x="12" y="8" width="3" height="10" rx="1"></rect>
+                <rect x="17" y="5" width="3" height="13" rx="1"></rect>
+            </svg>
+        </div>
+        <div class="feature-title">Confidence Scores</div>
+        <div class="feature-desc">Transparent risk assessment with explainable predictions.</div>
+    </div>
+</div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="max-width: 1400px; margin: 3rem auto; border-radius: 16px;">
+    <div class="card-header">
+        <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">
+            Phishing Detection Dashboard
+        </h2>
+        <p style="font-size: 1rem; color: rgba(255,255,255,0.85); max-width: 90%; margin: 0 auto;">
+            Analyze emails, URLs, and content for potential phishing threats using advanced AI models
+        </p>
+    </div>
+
+        
+        <div class="card-body">
+            <form id="detectForm" method="post" action="{{ url_for('predict') }}">
+                <div class="form-group">
+                    <label>Detection Mode</label>
+                    <div class="mode-selection">
+                        <div class="mode-option">
+                            <input type="radio" id="mode-email" name="mode" value="email" checked>
+                            <label for="mode-email">
+                                <strong style="display:inline-flex;align-items:center;gap:8px;font-weight:700;">
+                                    <!-- inline SVG envelope icon -->
+                                    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+                                        <defs>
+                                        <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
+                                            <stop offset="0" stop-color="#4f46e5"/>
+                                            <stop offset="1" stop-color="#06b6d4"/>
+                                        </linearGradient>
+                                        </defs>
+                                        <path fill="url(#g1)" d="M2 6.5A2.5 2.5 0 0 1 4.5 4h15A2.5 2.5 0 0 1 22 6.5v11A2.5 2.5 0 0 1 19.5 20h-15A2.5 2.5 0 0 1 2 17.5v-11zM4.5 6a.5.5 0 0 0-.5.5V8l7 4.5L18.5 8V6.5a.5.5 0 0 0-.5-.5h-13z" />
+                                    </svg>
+                                    Email Analysis
+                                    </strong><br>
+
+                                <small>Analyze email content for phishing indicators</small>
+                            </label>
+                        </div>
+                        <div class="mode-option">
+                            <input type="radio" id="mode-url" name="mode" value="url">
+                            <label for="mode-url">
+                                <strong style="display:inline-flex;align-items:center;gap:8px;font-weight:700;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+                                        <defs>
+                                        <linearGradient id="linkGradient" x1="0" x2="1" y1="0" y2="1">
+                                            <stop offset="0" stop-color="#2563eb"/>
+                                            <stop offset="1" stop-color="#06b6d4"/>
+                                        </linearGradient>
+                                        </defs>
+                                        <path fill="url(#linkGradient)" d="M10.59 13.41a1 1 0 0 1 0-1.41l2.12-2.12a1 1 0 0 1 1.41 1.41l-2.12 2.12a1 1 0 0 1-1.41 0zm-2.83 2.83a3 3 0 0 1 0-4.24l2.12-2.12a3 3 0 0 1 4.24 0 1 1 0 1 1-1.41 1.41 1 1 0 0 0-1.42 0L9.17 13a1 1 0 0 0 1.42 1.42l1.41-1.41a1 1 0 0 1 1.41 1.41l-1.41 1.41a3 3 0 0 1-4.24 0zm8.48-8.48a3 3 0 0 1 0 4.24l-2.12 2.12a3 3 0 0 1-4.24 0 1 1 0 0 1 1.41-1.41 1 1 0 0 0 1.42 0l2.12-2.12a1 1 0 0 0-1.42-1.42L12 8.83a1 1 0 1 1-1.41-1.41l1.41-1.41a3 3 0 0 1 4.24 0z"/>
+                                    </svg>
+                                    URL Analysis
+                                    </strong><br>
+
+                                <small>Check URLs for malicious patterns</small>
+                            </label>
+                        </div>
+                        <div class="mode-option">
+                            <input type="radio" id="mode-hybrid" name="mode" value="hybrid">
+                            <label for="mode-hybrid">
+                               <strong style="display:inline-flex;align-items:center;gap:8px;font-weight:700;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+                                        <defs>
+                                        <linearGradient id="hybridGradient" x1="0" x2="1" y1="0" y2="1">
+                                            <stop offset="0" stop-color="#06b6d4"/>
+                                            <stop offset="1" stop-color="#10b981"/>
+                                        </linearGradient>
+                                        </defs>
+                                        <path fill="url(#hybridGradient)" d="M10 2a8 8 0 0 1 6.32 12.9l4.39 4.39a1 1 0 1 1-1.42 1.42l-4.39-4.39A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 4.24 10.24A6 6 0 0 0 10 4z"/>
+                                    </svg>
+                                    Hybrid Analysis
+                                    </strong><br>
+
+                                <small>Combined email and URL detection</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="field-email" class="field-group">
+                    <label for="text">Email Content / Suspicious Text</label>
+                    <textarea id="text" name="text" class="form-control" rows="8" 
+                              placeholder="Paste the email body or suspicious message here..."></textarea>
+                    <div class="form-help">
+                        For hybrid analysis, paste the email content and URLs will be extracted automatically.
+                    </div>
+                </div>
+
+                <div id="field-url" class="field-group hidden">
+                    <label for="url">URL to Analyze</label>
+                    <input type="url" id="url" name="url" class="form-control" 
+                           placeholder="https://example.com/suspicious-link">
+                    <div class="form-help">
+                        Enter the complete URL including http:// or https://
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg">
+                    🔍 Analyze for Threats
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card" style="max-width: 1400px; margin: 3rem auto; border-radius: 16px;">
+        <div class="card-header">
+            <h2>How It Works</h2>
+        </div>
+        <div class="card-body">
+            <div class="analytics-grid">
+                <div class="stat-card">
+                    <div class="stat-number">📧</div>
+                    <div class="stat-label">Email Analysis</div>
+                    <p style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem;">
+                        Advanced NLP models analyze email content, metadata, and linguistic patterns
+                    </p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">🔗</div>
+                    <div class="stat-label">URL Detection</div>
+                    <p style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem;">
+                        Machine learning algorithms assess URL structure and domain reputation
+                    </p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">🤖</div>
+                    <div class="stat-label">AI-Powered</div>
+                    <p style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem;">
+                        Ensemble models with TF-IDF vectorization and conformal prediction
+                    </p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">⚡</div>
+                    <div class="stat-label">Real-time</div>
+                    <p style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem;">
+                        Instant analysis with detailed confidence scores and explanations
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}PhishGuard Pro - Advanced Phishing Detection{% endblock %}</title>
+    <meta name="description" content="Professional phishing detection system using advanced AI and machine learning">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/three@0.155.0/build/three.min.js"></script>
+</head>
+<body>
+    <div class="background-animation"></div>
+    <div class="floating-particles"></div>
+    
+    <header class="topbar">
+        <a href="{{ url_for('dashboard') if session.username else url_for('login') }}" class="logo">
+            <div class="logo-icon" style="
+                width: 48px;
+                height: 48px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: linear-gradient(135deg, #0ea5a4, #2563eb);
+                box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+                ">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28" fill="white">
+                    <path d="M12 2L4 5v6c0 5.55 3.84 10.74 8 11.95 4.16-1.21 8-6.4 8-11.95V5l-8-3z"/>
+                </svg>
+                </div>
+
+            <span class="logo-text">PhishGuard Pro</span>
+        </a>
+        
+        <div class="nav-links">
+    {% if session.username %}
+        <a href="{{ url_for('dashboard') }}" class="nav-link">
+            <span class="nav-icon"><i class="fas fa-tachometer-alt"></i></span>
+            Dashboard
+        </a>
+        <a href="{{ url_for('analytics') }}" class="nav-link">
+            <span class="nav-icon"><i class="fas fa-chart-line"></i></span>
+            Analytics
+        </a>
+        <a href="{{ url_for('contact') }}" class="nav-link">
+            <span class="nav-icon"><i class="fas fa-envelope"></i></span>
+            Contact
+        </a>
+        {% if session.is_admin %}
+            <a href="{{ url_for('admin') }}" class="nav-link admin-link">
+                <span class="nav-icon"><i class="fas fa-user-shield"></i></span>
+                Admin
+            </a>
+        {% endif %}
+        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+        <span class="theme-icon"><i class="fas fa-moon"></i></span>
+        </button>
+
+                <div class="user-info">
+                    <div class="user-avatar">{{ session.username[0].upper() }}</div>
+                    <div class="user-details">
+                        <span class="user-name">{{ session.username }}</span>
+                        <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+                    </div>
+                </div>
+            {% else %}
+               <a href="{{ url_for('contact') }}" class="nav-link">
+       <span class="nav-icon"><i class="fas fa-envelope"></i></span>
+            Contact
+        </a>
+        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+            <span class="theme-icon"><i class="fas fa-moon"></i></span>
+        </button>
+
+            {% endif %}
+        </div>
+    </header>
+
+    <main class="main-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="container">
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="flash {{ category }}">
+                                <span class="flash-icon">
+                                    {% if category == 'success' %}✅
+                                    {% elif category == 'danger' %}❌
+                                    {% elif category == 'warning' %}⚠️
+                                    {% else %}ℹ️{% endif %}
+                                </span>
+                                <span class="flash-message">{{ message }}</span>
+                                <button class="flash-close" onclick="this.parentElement.remove()">×</button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3 class="footer-title">
+                    <div class="footer-logo" style="
+                        width: 48px;
+                        height: 48px;
+                        border-radius: 12px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        background: linear-gradient(135deg, #0ea5a4, #2563eb);
+                        box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+                        ">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28" fill="white">
+                            <path d="M12 2L4 5v6c0 5.55 3.84 10.74 8 11.95 4.16-1.21 8-6.4 8-11.95V5l-8-3z"/>
+                        </svg>
+                        </div>
+
+                    PhishGuard Pro
+                </h3>
+                <p class="footer-description">
+                    Advanced AI-powered phishing detection system protecting users from cyber threats with cutting-edge machine learning technology.
+                </p>
+            </div>
+            
+            <div class="footer-section">
+                <h4 class="footer-subtitle">Development Team</h4>
+                <div class="developers-grid">
+                    <div class="developer">
+                        <span class="dev-name">PRANAV V P</span>
+                    </div>
+                    <div class="developer">
+                        <span class="dev-name">PRAJWAL C A</span>
+                    </div>
+                    <div class="developer">
+                        <span class="dev-name">NAGASHREE D S</span>
+                    </div>
+                    <div class="developer">
+                        <span class="dev-name">PALLAVI JHA</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h4 class="footer-subtitle">Quick Links</h4>
+                <div class="footer-links">
+                    <a href="{{ url_for('dashboard') if session.username else url_for('login') }}">Home</a>
+                    <a href="{{ url_for('contact') }}">Contact</a>
+                    {% if session.username %}
+                        <a href="{{ url_for('analytics') }}">Analytics</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p class="copyright">
+                © 2024 PhishGuard Pro. Advanced Phishing Detection System. All rights reserved.
+            </p>
+            <div class="footer-tech">
+                <span>Powered by AI & Machine Learning</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
