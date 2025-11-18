@@ -9,26 +9,6 @@ from bson import ObjectId
 MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/")
 DB_NAME = "phishing_detector"
 
-
-## FOR MONGODB ATLAS CLOUD BASED INTEGRATION:
-# from pymongo import MongoClient
-# from werkzeug.security import generate_password_hash, check_password_hash
-# from datetime import datetime
-# import os
-# from bson import ObjectId
-# from dotenv import load_dotenv 
-
-# # ✅ Load environment variables from .env file
-# load_dotenv()
-
-# # ✅ Now get MONGO_URI from environment
-# MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
-# DB_NAME = "phishing_detector"
-
-
-
-
-
 # ✅ Create Mongo client using that URI
 client = MongoClient(MONGO_URI)
 db = client[DB_NAME]
@@ -218,6 +198,7 @@ def get_analytics_data(username=None):
     }
 
 create_admin_user()
+
 
 
 
