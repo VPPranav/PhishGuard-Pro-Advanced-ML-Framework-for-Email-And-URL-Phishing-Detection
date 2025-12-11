@@ -1,4 +1,4 @@
-# PhishGuard Pro - Advanced Phishing Detection System
+# PhishGuard Pro - Advanced ML Framework for Email And URL Phishing Detection
 
 A professional-grade phishing detection system built with Flask and advanced machine learning models. This system provides comprehensive email, URL, and hybrid content analysis with a modern, responsive web interface.
 
@@ -379,8 +379,6 @@ Users should review the original dataset licenses before redistribution or comme
 
 - **PRANAV VP** 
 - **PRAJWAL CA** 
-- **NAGASHREE DS** 
-- **PALLAVI JHA** 
 
 ## 📝 API Endpoints
 
@@ -482,4 +480,5 @@ This project is developed as an academic/research project. All rights reserved t
 
 **PhishGuard Pro** - Professional Phishing Detection System
 *Protecting organizations from email, url's and web-based threats through advanced AI*
+
 
